@@ -78,9 +78,9 @@ public class ItemRepositoryImpl implements ItemRepository {
     public List<Item> search(String text) {
         List<Item> itemsToResponse = new ArrayList<>();
         for (Item item : items.values()) {
-            if (item.getName().toLowerCase().contains(text.toLowerCase()) ||
-                    item.getDescription().toLowerCase().contains(text.toLowerCase())) {
-                if (item.getAvailable()) {
+            if (item.getAvailable()) {
+                if (item.getName().toLowerCase().contains(text.toLowerCase()) ||
+                        item.getDescription().toLowerCase().contains(text.toLowerCase())) {
                     itemsToResponse.add(item);
                 }
             }

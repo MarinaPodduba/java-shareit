@@ -3,8 +3,9 @@ package ru.practicum.shareit.user.repository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.exception.ValidationException;
+import ru.practicum.shareit.exception.ValidationExceptionOnDuplicate;
 import ru.practicum.shareit.user.model.User;
+
 import java.util.*;
 
 import static ru.practicum.shareit.utils.MessagesUser.*;
@@ -80,7 +81,7 @@ public class UserRepositoryImpl implements UserRepository {
     public void checkMail(User checkUser) {
         for (User user : users.values()) {
             if (checkUser.getEmail().equals(user.getEmail())) {
-                throw new ValidationException(String.format(CHECK_EMAIL, user.getEmail()));
+                throw new ValidationExceptionOnDuplicate(String.format(CHECK_EMAIL, user.getEmail()));
             }
         }
     }

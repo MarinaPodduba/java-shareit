@@ -1,8 +1,14 @@
 package ru.practicum.shareit.booking;
 
 public enum StatusBookingEnum {
-    WAITING, // новое бронирование, ожидает одобрения
-    APPROVED, // бронирование подтверждено владельцем
-    REJECTED, // бронирование отклонено владельцем
-    CANCELED // бронирование отменено создателем
+    WAITING("Новое бронирование, ожидает одобрения"),
+    APPROVED("Бронирование подтверждено владельцем"),
+    REJECTED("Бронирование отклонено владельцем"),
+    CANCELED("Бронирование отменено создателем");
+
+    private final String messageStatus;
+
+    private StatusBookingEnum(String messageStatus) {
+        this.messageStatus = messageStatus;
+    }
 }
