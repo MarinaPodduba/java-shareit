@@ -7,4 +7,6 @@ public class MessagesError {
     public static final String HANDLE_VALIDATION_EXCEPTION = "400. Ошибка валидации";
     public static final String HANDLE_NOT_FOUND_EXCEPTION = "404. Объект не найден";
     public static final String HANDLE_EXCEPTION = "500. Возникло исключение";
+    public static final String LOG_HANDLE_VALIDATION_EXCEPTION_CONFLICT = "Возникла ошибка 409: {}";
+    public static final String HANDLE_VALIDATION_EXCEPTION_CONFLICT = "409. Возникло исключение";
 }
