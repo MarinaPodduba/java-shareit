@@ -6,8 +6,12 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 public class BookingShortDto {
     private int id;
     private int bookerId;
+
+    public BookingShortDto(int id, int bookerId) {
+        this.id = id;
+        this.bookerId = bookerId;
+    }
 }
