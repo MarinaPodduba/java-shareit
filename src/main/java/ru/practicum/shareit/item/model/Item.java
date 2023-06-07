@@ -33,7 +33,7 @@ public class Item {
     private User owner;
 
     @ManyToOne
-    @JoinColumn(name = "request_id")
+    @JoinColumn(name = "request")
     private ItemRequest request;
 
     public Item(int id, String name, String description, Boolean available, User owner) {
