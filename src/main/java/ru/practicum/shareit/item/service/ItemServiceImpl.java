@@ -2,9 +2,12 @@ package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.StatusBookingEnum;
 import ru.practicum.shareit.booking.dto.BookingShortDto;
+import ru.practicum.shareit.booking.mapper.BookingMapper;
+import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exception.NotFoundException;
 
@@ -23,6 +26,8 @@ import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
@@ -56,16 +61,29 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemDtoBooking> getAll(int userId) {
-        List<ItemDtoBooking> returned = new ArrayList<>();
-        List<Item> items = itemRepository.findAllByOwnerIdOrderByIdAsc(userId);
-        for (Item item : items) {
-            List<Comment> comments = commentRepository.findCommentsByItemIdOrderByCreatedAsc(item.getId());
-            returned.add(ItemMapper.toItemBookingDto(item,
-                    getLastBooking(item.getId(), userId),
-                    getNextBooking(item.getId(), userId),
-                    comments));
-        }
-        return returned;
+        List<Item> items = itemRepository.findAllByOwnerId(userId);
+
+        Map<Integer, Item> itemMap = itemRepository.findByOwnerId(userId)
+                .stream()
+                .collect(Collectors.toMap(Item::getId, Function.identity()));
+
+        Map<Integer, List<Booking>> bookingMap = bookingRepository.findByItemIdIn(itemMap.keySet(),
+                        Sort.by(Sort.Direction.ASC, "start"))
+                .stream()
+                .collect(Collectors.groupingBy(b -> b.getItem().getId()));
+
+        Map<Integer, List<Comment>> comments = commentRepository.findByItemIdIn(itemMap.keySet(),
+                        Sort.by(Sort.Direction.ASC, "created")).stream()
+                .collect(Collectors.groupingBy(comment -> comment.getItem().getId()));
+
+        return items.stream()
+                .map(item -> ItemMapper.toItemBookingDto(
+                        item,
+                        getAllLastBooking(bookingMap.getOrDefault(item.getId(), null)),
+                        getAllNextBooking(bookingMap.getOrDefault(item.getId(), null)),
+                        comments.getOrDefault(item.getId(), Collections.emptyList())
+                ))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -137,5 +155,27 @@ public class ItemServiceImpl implements ItemService {
             return nextList.get(0);
         }
         return null;
+    }
+
+    private BookingShortDto getAllNextBooking(List<Booking> booking) {
+        if (booking == null || booking.isEmpty()) {
+            return null;
+        }
+        return booking.stream()
+                .filter(b -> b.getStart().isAfter(LocalDateTime.now()))
+                .findFirst()
+                .map(BookingMapper::toBookingShortDto)
+                .orElse(null);
+    }
+
+    private BookingShortDto getAllLastBooking(List<Booking> booking) {
+        if (booking == null || booking.isEmpty()) {
+            return null;
+        }
+        return booking.stream()
+                .filter(b -> b.getStart().isBefore(LocalDateTime.now()))
+                .reduce((booking1, booking2) -> booking2)
+                .map(BookingMapper::toBookingShortDto)
+                .orElse(null);
     }
 }

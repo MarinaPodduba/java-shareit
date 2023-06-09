@@ -11,6 +11,7 @@ import ru.practicum.shareit.booking.model.Booking;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Integer> {
@@ -51,5 +52,7 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
             "where b.item.id=?1 and b.item.owner.id=?2 and b.status=?3 and b.start<?4 " +
             "order by b.start desc")
     List<BookingShortDto> getLastBooking(int itemId, int userId, StatusBookingEnum status,
-                                         LocalDateTime now, Pageable pageable);
+                                                LocalDateTime now, Pageable pageable);
+
+    List<Booking> findByItemIdIn(Set<Integer> itemId, Sort sort);
 }

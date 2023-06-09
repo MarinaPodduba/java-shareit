@@ -30,10 +30,10 @@ public class BookingServiceImpl implements BookingService {
     private final ItemRepository itemRepository;
 
     @Override
-    public BookingDto add(AddNewBookingDto addNewBookingDto) {
+    public BookingDto add(AddNewBookingDto addNewBookingDto, int userId) {
         Item item = itemRepository.findById(addNewBookingDto.getItemId()).orElseThrow(() ->
                 new NotFoundException(String.format("Вещь под id %d не найден", addNewBookingDto.getItemId())));
-        User user = userRepository.findById(addNewBookingDto.getUserId()).orElseThrow(() ->
+        User user = userRepository.findById(userId).orElseThrow(() ->
                 new NotFoundException(String.format("Пользователь под id %d не найден", addNewBookingDto.getUserId())));
         checkAdd(addNewBookingDto, user, item);
         Booking booking = bookingRepository.save(BookingMapper.mapToAddNewBooking(addNewBookingDto, item, user));
@@ -75,87 +75,77 @@ public class BookingServiceImpl implements BookingService {
             throw new NotFoundException(String.format("Пользователь под id %d не найден", userId));
         }
         Sort sort = Sort.sort(Booking.class).by(Booking::getStart).descending();
+        List<Booking> bookingsList = new ArrayList<>();
         try {
             switch (stateBookingEnum) {
                 case ALL:
-                    return bookingRepository.findAllByBookerId(userId, sort)
-                            .stream()
-                            .map(BookingMapper::mapToBookingDto)
-                            .collect(Collectors.toList());
+                    bookingsList.addAll(bookingRepository.findAllByBookerId(userId, sort));
+                    break;
                 case CURRENT:
-                    return bookingRepository.findAllByBookerIdAndStartIsBeforeAndEndIsAfter(userId,
-                                    LocalDateTime.now(), LocalDateTime.now(), sort)
-                            .stream()
-                            .map(BookingMapper::mapToBookingDto)
-                            .collect(Collectors.toList());
+                    bookingsList.addAll(bookingRepository.findAllByBookerIdAndStartIsBeforeAndEndIsAfter(userId,
+                                    LocalDateTime.now(), LocalDateTime.now(), sort));
+                    break;
                 case PAST:
-                    return bookingRepository.findAllByBookerIdAndEndIsBefore(userId, LocalDateTime.now(), sort)
-                            .stream()
-                            .map(BookingMapper::mapToBookingDto)
-                            .collect(Collectors.toList());
+                    bookingsList.addAll(bookingRepository.findAllByBookerIdAndEndIsBefore(userId,
+                            LocalDateTime.now(), sort));
+                    break;
                 case FUTURE:
-                    return bookingRepository.findAllByBookerIdAndStartIsAfter(userId, LocalDateTime.now(), sort)
-                            .stream()
-                            .map(BookingMapper::mapToBookingDto)
-                            .collect(Collectors.toList());
+                    bookingsList.addAll(bookingRepository.findAllByBookerIdAndStartIsAfter(userId,
+                            LocalDateTime.now(), sort));
+                    break;
                 case WAITING:
-                    return bookingRepository.findAllByBookerIdAndStatus(userId, StatusBookingEnum.WAITING, sort)
-                            .stream()
-                            .map(BookingMapper::mapToBookingDto)
-                            .collect(Collectors.toList());
+                    bookingsList.addAll(bookingRepository.findAllByBookerIdAndStatus(userId,
+                            StatusBookingEnum.WAITING, sort));
+                    break;
                 case REJECTED:
-                    return bookingRepository.findAllByBookerIdAndStatus(userId, StatusBookingEnum.REJECTED, sort)
-                            .stream()
-                            .map(BookingMapper::mapToBookingDto)
-                            .collect(Collectors.toList());
+                    bookingsList.addAll(bookingRepository.findAllByBookerIdAndStatus(userId,
+                            StatusBookingEnum.REJECTED, sort));
+                    break;
             }
-            return new ArrayList<>();
+            return bookingsList.stream()
+                    .map(BookingMapper::mapToBookingDto)
+                    .collect(Collectors.toList());
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException();
         }
     }
 
     @Override
-    public List<BookingDto> getAllBookingsOfOwner(int userId, StateBookingEnum stateBookingEnum) {
+    public List<BookingDto> getAllBookingsOfOwner(int userId, final StateBookingEnum stateBookingEnum) {
         if (!userRepository.existsById(userId)) {
             throw new NotFoundException(String.format("Пользователь под id %d не найден", userId));
         }
         Sort sort = Sort.sort(Booking.class).by(Booking::getStart).descending();
+        List<Booking> bookingsList = new ArrayList<>();
         try {
             switch (stateBookingEnum) {
                 case ALL:
-                    return bookingRepository.findAllByItemOwnerId(userId, sort)
-                            .stream()
-                            .map(BookingMapper::mapToBookingDto)
-                            .collect(Collectors.toList());
+                    bookingsList.addAll(bookingRepository.findAllByItemOwnerId(userId, sort));
+                    break;
                 case CURRENT:
-                    return bookingRepository.findAllByItemOwnerIdAndStartIsBeforeAndEndIsAfter(userId,
-                                    LocalDateTime.now(), LocalDateTime.now(), sort)
-                            .stream()
-                            .map(BookingMapper::mapToBookingDto)
-                            .collect(Collectors.toList());
+                    bookingsList.addAll(bookingRepository.findAllByItemOwnerIdAndStartIsBeforeAndEndIsAfter(userId,
+                                    LocalDateTime.now(), LocalDateTime.now(), sort));
+                    break;
                 case PAST:
-                    return bookingRepository.findAllByItemOwnerIdAndEndIsBefore(userId, LocalDateTime.now(), sort)
-                            .stream()
-                            .map(BookingMapper::mapToBookingDto)
-                            .collect(Collectors.toList());
+                    bookingsList.addAll(bookingRepository.findAllByItemOwnerIdAndEndIsBefore(userId,
+                            LocalDateTime.now(), sort));
+                    break;
                 case FUTURE:
-                    return bookingRepository.findAllByItemOwnerIdAndStartIsAfter(userId, LocalDateTime.now(), sort)
-                            .stream()
-                            .map(BookingMapper::mapToBookingDto)
-                            .collect(Collectors.toList());
+                    bookingsList.addAll(bookingRepository.findAllByItemOwnerIdAndStartIsAfter(userId,
+                            LocalDateTime.now(), sort));
+                    break;
                 case WAITING:
-                    return bookingRepository.findAllByItemOwnerIdAndStatus(userId, StatusBookingEnum.WAITING, sort)
-                            .stream()
-                            .map(BookingMapper::mapToBookingDto)
-                            .collect(Collectors.toList());
+                    bookingsList.addAll(bookingRepository.findAllByItemOwnerIdAndStatus(userId,
+                            StatusBookingEnum.WAITING, sort));
+                    break;
                 case REJECTED:
-                    return bookingRepository.findAllByItemOwnerIdAndStatus(userId, StatusBookingEnum.REJECTED, sort)
-                            .stream()
-                            .map(BookingMapper::mapToBookingDto)
-                            .collect(Collectors.toList());
+                    bookingsList.addAll(bookingRepository.findAllByItemOwnerIdAndStatus(userId,
+                            StatusBookingEnum.REJECTED, sort));
+                    break;
             }
-            return new ArrayList<>();
+            return bookingsList.stream()
+                    .map(BookingMapper::mapToBookingDto)
+                    .collect(Collectors.toList());
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException();
         }

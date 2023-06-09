@@ -24,14 +24,13 @@ public class BookingController {
     @PostMapping
     public BookingDto addBooking(@Valid @RequestBody AddNewBookingDto addNewBookingDto,
                                  @RequestHeader(OWNER_ID) int userId) {
-        addNewBookingDto.setUserId(userId);
-        BookingDto bookingDto = service.add(addNewBookingDto);
+        BookingDto bookingDto = service.add(addNewBookingDto, userId);
         log.info("Получен запрос POST /bookings. Владелец вещи {}", userId);
         return bookingDto;
     }
 
     @PatchMapping("/{bookingId}")
-    public BookingDto approvedOrRejectedBooking(@Valid @PathVariable int bookingId,
+    public BookingDto approvedOrRejectedBooking(@PathVariable int bookingId,
                                                 @RequestHeader(OWNER_ID) int userId,
                                                 @RequestParam boolean approved) {
         log.info("Получен запрос PATCH /bookings/{} (Подтверждение или отклонение запроса на бронирование)", bookingId);

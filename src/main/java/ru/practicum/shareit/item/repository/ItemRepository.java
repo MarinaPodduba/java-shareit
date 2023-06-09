@@ -8,7 +8,9 @@ import java.util.List;
 
 @Repository
 public interface ItemRepository extends JpaRepository<Item, Integer> {
-    List<Item> findAllByOwnerIdOrderByIdAsc(int userId);
+    List<Item> findByOwnerId(int ownerId);
 
     List<Item> findAllByNameOrDescriptionContainingIgnoreCaseAndAvailableTrue(String name, String description);
+
+    List<Item> findAllByOwnerId(int userId);
 }
