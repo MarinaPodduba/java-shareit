@@ -9,4 +9,5 @@ public class MessagesError {
     public static final String HANDLE_EXCEPTION = "500. Возникло исключение";
     public static final String LOG_HANDLE_VALIDATION_EXCEPTION_CONFLICT = "Возникла ошибка 409: {}";
     public static final String HANDLE_VALIDATION_EXCEPTION_CONFLICT = "409. Возникло исключение";
+
 }

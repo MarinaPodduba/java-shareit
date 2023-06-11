@@ -43,9 +43,16 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR) // 500
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public Map<String, String> handleThrowableException(final Throwable ex) {
         log.info(LOG_HANDLE_EXCEPTION, ex.getMessage());
         return Map.of(HANDLE_EXCEPTION, ex.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    protected Map<String, String> handleUnknownStateException(final UnknownStateException ex) {
+        log.info(LOG_HANDLE_VALIDATION_EXCEPTION, ex.getMessage());
+        return Map.of("error", "Unknown state: " + ex.getMessage());
     }
 }

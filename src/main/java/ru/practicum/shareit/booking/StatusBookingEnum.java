@@ -8,7 +8,7 @@ public enum StatusBookingEnum {
 
     private final String messageStatus;
 
-    private StatusBookingEnum(String messageStatus) {
+    StatusBookingEnum(String messageStatus) {
         this.messageStatus = messageStatus;
     }
 }
